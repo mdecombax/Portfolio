@@ -130,7 +130,7 @@ export default function App() {
   return (
     <>
       <Cursor />
-      <BgMusic src="/music.mp3" volume={0.4} />
+      <BgMusic src={`${import.meta.env.BASE_URL}music.mp3`} volume={0.4} />
       <Canvas
         camera={{ position: [5, 2, 5], fov: 45 }}
         gl={{ antialias: true, toneMappingExposure: 1, alpha: true }}

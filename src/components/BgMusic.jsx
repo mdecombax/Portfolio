@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 // Musique de fond. Les navigateurs bloquent l'autoplay audio tant que
 // l'utilisateur n'a pas interagi : on démarre donc la lecture au premier
 // clic / touche / toucher, puis on expose un bouton mute/unmute.
-export default function BgMusic({ src = '/music.mp3', volume = 0.4 }) {
+export default function BgMusic({ src = `${import.meta.env.BASE_URL}music.mp3`, volume = 0.4 }) {
   const audioRef = useRef(null)
   const [muted, setMuted] = useState(false)
   const [started, setStarted] = useState(false)

@@ -6,10 +6,13 @@ import * as THREE from 'three'
 // Distance d'ouverture du tiroir, en unités locales de group1 (profondeur ≈ 1.69)
 const DRAWER_OPEN = 1.15
 
+// Préfixe d'URL des assets (gère le base Vite, ex. '/Portfolio/' en prod)
+const BASE = import.meta.env.BASE_URL
+
 export default function Room({ focusedZone }) {
-  const { scene } = useGLTF('/room.glb')
+  const { scene } = useGLTF(`${BASE}room.glb`)
   const { camera, raycaster, pointer } = useThree()
-  const tvTexture = useVideoTexture('/tv.mp4', { loop: true, muted: true, autoplay: true, crossOrigin: 'anonymous' })
+  const tvTexture = useVideoTexture(`${BASE}tv.mp4`, { loop: true, muted: true, autoplay: true, crossOrigin: 'anonymous' })
   const hoveredZoneRef = useRef(null)
   const labelPos = useRef({})
   const interactiveMeshes = useRef([])
@@ -51,7 +54,7 @@ export default function Room({ focusedZone }) {
       zoneBoxes[zone].expandByObject(child)
     }
 
-    const daftPunkTex = new THREE.TextureLoader().load('/daftpunk.jpg')
+    const daftPunkTex = new THREE.TextureLoader().load(`${BASE}daftpunk.jpg`)
     daftPunkTex.flipY = true
 
     scene.traverse((child) => {
@@ -281,4 +284,4 @@ export default function Room({ focusedZone }) {
   return <primitive object={scene} scale={scale} position={position} />
 }
 
-useGLTF.preload('/room.glb')
+useGLTF.preload(`${import.meta.env.BASE_URL}room.glb`)
