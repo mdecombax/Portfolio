@@ -204,6 +204,41 @@ export default function LoadingScreen() {
             Entrer
           </button>
         </div>
+
+        {/* Indice : la musique démarre en entrant */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginTop: '-0.4rem',
+            fontSize: '0.7rem',
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: '#fff3e6',
+            opacity: ready ? 0.6 : 0,
+            transform: ready ? 'none' : 'translateY(8px)',
+            transition: 'opacity 0.6s ease 0.25s, transform 0.6s ease 0.25s',
+            pointerEvents: 'none',
+          }}
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor" stroke="none" />
+            <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+            <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+          </svg>
+          <span>Mettez le son</span>
+        </div>
       </div>
     </div>
   )
