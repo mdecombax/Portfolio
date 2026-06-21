@@ -6,7 +6,8 @@ const ZONE_PANELS = {
   screen: {
     title: 'apps & outils',
     items: [
-      { id: 'finolio',      label: 'Finolio',              desc: 'Suivi de portefeuille DCA ETF',          url: 'https://finolio.fr/' },
+      { id: 'finolio',      label: 'Finolio',              desc: 'Suivi de portefeuille DCA ETF',          url: 'https://finolio.fr/',
+        caseStudy: { label: 'étude technique — Import IA (Vertex AI)', url: 'https://github.com/mdecombax/suivi-finance/blob/main/docs/ai-import/README.md' } },
       { id: 'flightscrape', label: 'FlightScrape',         desc: 'Meilleur prix pour un vol flexible',     url: 'https://flightscrape-437494083751.europe-west1.run.app/' },
       { id: 'autocast',     label: 'AutoCast Chess',       desc: "Commentaire audio d'une partie chess.com", url: 'https://autocastchess-855080868600.europe-west1.run.app/' },
       { id: 'avismaps',     label: 'Avis Maps',            desc: 'Avis Google Maps + analyse de prospects', url: 'https://avis-maps-app-74733590596.europe-west1.run.app/' },
@@ -77,6 +78,13 @@ export default function ProjectCard({ focusedZone, zoomReady }) {
         }
         .pc-item:hover .pc-desc { max-height: 36px; opacity: 1; margin-top: 4px; color: rgba(200, 214, 240, 0.72); }
         .pc-item:hover .pc-arrow { opacity: 1; transform: translateX(0); }
+        .pc-case {
+          max-height: 0; opacity: 0; margin-top: 0; overflow: hidden;
+          transition: max-height 0.22s ease, opacity 0.18s ease, margin-top 0.22s ease;
+        }
+        .pc-item:hover .pc-case { max-height: 30px; opacity: 1; margin-top: 6px; }
+        .pc-case-link { color: rgba(255, 153, 68, 0.7); transition: color 0.15s; }
+        .pc-case-link:hover { color: #ff9944; }
       `}</style>
       <div
         onMouseDown={e => e.stopPropagation()}
@@ -157,6 +165,26 @@ export default function ProjectCard({ focusedZone, zoomReady }) {
             >
               {item.desc}
             </div>
+            {item.caseStudy && (
+              <div
+                className="pc-case"
+                onClick={e => {
+                  e.stopPropagation()
+                  window.open(item.caseStudy.url, '_blank', 'noopener,noreferrer')
+                }}
+              >
+                <span
+                  className="pc-case-link"
+                  style={{
+                    fontSize: '0.54rem',
+                    letterSpacing: '0.02em',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  ↗ {item.caseStudy.label}
+                </span>
+              </div>
+            )}
           </div>
         ))}
 
