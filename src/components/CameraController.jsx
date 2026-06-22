@@ -52,31 +52,31 @@ const ZONE_VIEWS = {
   ),
 }
 
-// Vues mobiles : la cible (centre projeté à l'écran) est posée SUR l'objet — pas
-// décalée comme en desktop (où elle laisse de la place au panneau latéral). La
-// caméra recule pour compenser le FOV horizontal étroit du portrait, l'objet se
-// retrouve centré dans le tiers haut, au-dessus du bottom-sheet.
-// À affiner à l'œil via window.debug.camlog (logue camPos + target courants).
+// Vues mobiles calibrées depuis les boîtes englobantes world RÉELLES de chaque
+// zone (window.debug.zones) + un fit géométrique (fov/aspect portrait) : l'objet
+// est centré, occupe ~50-72% de la largeur et remonte au-dessus du bottom-sheet.
+// Re-calibration : window.debug.zones() pour les centres, window.__camOverride
+// = {camPos:[...],target:[...]} pour prévisualiser une vue en direct.
 const MOBILE_ZONE_VIEWS = {
-  // Écran / bureau — vue de face-droite, reculée
+  // Écran / bureau — vue de face-droite, moniteur centré
   screen: makeZoneView(
-    new THREE.Vector3(0.463, 0.113, -1.215),
-    new THREE.Vector3(-1.020, -0.100, -1.050),
+    new THREE.Vector3(1.713, 0.452, -0.041),
+    new THREE.Vector3(-1.045, -0.510, -1.176),
   ),
-  // Téléphone sur le lit — cible recalée sur le smartphone (bas-droite du lit)
+  // Téléphone sur le lit — plongée pour lire l'écran du smartphone
   phone: makeZoneView(
-    new THREE.Vector3(0.900, 1.150, -0.250),
-    new THREE.Vector3(0.900, 0.000, -0.550),
+    new THREE.Vector3(1.318, 0.730, -0.636),
+    new THREE.Vector3(0.986, -0.600, -0.902),
   ),
-  // Robot sur l'étagère — vue de face, centré (sans le pan desktop)
+  // Robot sur l'étagère — vue de face, centré
   robot: makeZoneView(
-    new THREE.Vector3(0.238, 0.282, -0.357),
-    new THREE.Vector3(-1.020, 0.100, -0.120),
+    new THREE.Vector3(0.990, 0.703, -0.428),
+    new THREE.Vector3(-1.050, -0.125, -0.150),
   ),
-  // Tiroir ouvert — cible basse pour remonter le tiroir au-dessus du sheet
+  // Tiroir ouvert — plongée dans la cavité (boîte mesurée tiroir sorti)
   drawer: makeZoneView(
-    new THREE.Vector3(0.600, 0.050, 1.500),
-    new THREE.Vector3(-0.620, -0.780, 1.500),
+    new THREE.Vector3(0.598, 2.026, 1.565),
+    new THREE.Vector3(-0.935, -1.023, 1.504),
   ),
 }
 
@@ -131,6 +131,16 @@ export default function CameraController({ focusedZone, onZoomReady, isMobile = 
     const controls = _.controls
     if (!controls) return
     dbgTarget.current.copy(controls.target)
+
+    // Override de calibration : { camPos:[x,y,z], target:[x,y,z] } figé pour preview
+    const ov = typeof window !== 'undefined' && window.__camOverride
+    if (ov) {
+      controls.enabled = false
+      camera.position.set(ov.camPos[0], ov.camPos[1], ov.camPos[2])
+      controls.target.set(ov.target[0], ov.target[1], ov.target[2])
+      camera.lookAt(controls.target)
+      return
+    }
 
     const f = Math.min(LERP * delta * 60, 1)
     const views = isMobile ? MOBILE_ZONE_VIEWS : ZONE_VIEWS

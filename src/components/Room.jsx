@@ -188,6 +188,35 @@ export default function Room({ focusedZone, isMobile = false }) {
     }
     labelPos.current = positions
 
+    // Debug : centres/tailles world réels par zone (calibration des vues caméra)
+    if (typeof window !== 'undefined') {
+      window.debug = window.debug || {}
+      window.debug.scene = scene
+      window.debug.camera = camera
+      window.debug.zones = () => {
+        scene.updateMatrixWorld(true)
+        const out = {}
+        const byZone = {}
+        const collect = (m) => {
+          const z = m.userData?.zone
+          if (!z) return
+          ;(byZone[z] || (byZone[z] = new THREE.Box3())).expandByObject(m)
+        }
+        interactiveMeshes.current.forEach(collect)
+        extraInteractive.meshes.forEach(collect)
+        for (const [z, b] of Object.entries(byZone)) {
+          const c = new THREE.Vector3(), s = new THREE.Vector3()
+          b.getCenter(c); b.getSize(s)
+          out[z] = {
+            center: [c.x, c.y, c.z].map((v) => +v.toFixed(3)),
+            size: [s.x, s.y, s.z].map((v) => +v.toFixed(3)),
+          }
+        }
+        console.log('[zones]', JSON.stringify(out))
+        return out
+      }
+    }
+
     let downX = 0
     let downY = 0
 
