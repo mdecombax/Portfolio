@@ -46,8 +46,10 @@ export default function Robot() {
       child.receiveShadow = true
       child.material = child.material.clone()
       if (child.material.emissive) {
-        // garde l'emissive d'origine du robot, on ajoute le halo de hover via intensity
-        child.material.userData = { baseEmissive: child.material.emissive.clone() }
+        // Halo bleu froid (comme les zones de room.glb) : intensité pilotée par
+        // Room — pulsation d'invite au repos, plein éclat au survol.
+        child.material.emissive.set(0xaaccff)
+        child.material.emissiveIntensity = 0
       }
       child.userData.zone = 'robot'
       meshes.push(child)

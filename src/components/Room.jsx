@@ -234,7 +234,7 @@ export default function Room({ focusedZone }) {
     drawerOpen.current = focusedZone?.zone === 'drawer'
   }, [focusedZone])
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     // Animation du tiroir : progression lissée vers ouvert (1) / fermé (0)
     const target = drawerOpen.current ? 1 : 0
     const prev = drawerProgress.current
@@ -261,9 +261,11 @@ export default function Room({ focusedZone }) {
       hoveredZoneRef.current = zone
 
       let detail = null
-      const lp = zone ? (labelPos.current[zone] ?? extraInteractive.labelPos[zone]) : null
-      if (zone && lp) {
-        const projected = lp.clone().project(camera)
+      // Position du label = point d'impact réel du raycast (toujours sur la zone,
+      // sous le curseur). Les centroïdes Box3 (labelPos) sont peu fiables et
+      // plaçaient les tips de phone/drawer au niveau du bureau.
+      if (zone && hits.length > 0) {
+        const projected = hits[0].point.clone().project(camera)
         detail = {
           zone,
           x: (projected.x * 0.5 + 0.5) * window.innerWidth,
@@ -273,18 +275,25 @@ export default function Room({ focusedZone }) {
       window.dispatchEvent(new CustomEvent('hoveredzone', { detail }))
     }
 
-    // Pas de halo de survol quand une zone est déjà en focus
+    // Halo des zones cliquables (room.glb + robot) :
+    //  - zone en focus → éteint (panel ouvert)
+    //  - zone survolée → plein éclat
+    //  - au repos → pulsation d'invite permanente (signale que c'est cliquable)
     const hovered = focusedRef.current ? null : zone
-    interactiveMeshes.current.forEach((mesh) => {
-      if (mesh.material.emissive) {
-        const t = mesh.userData.zone === hovered ? 0.5 : 0
-        mesh.material.emissiveIntensity = THREE.MathUtils.lerp(
-          mesh.material.emissiveIntensity,
-          t,
-          0.12
-        )
-      }
-    })
+    const focusedZone = focusedRef.current?.zone
+    const pulse = 0.22 + 0.14 * Math.sin(state.clock.elapsedTime * 2)
+    const applyGlow = (mesh) => {
+      if (!mesh.material.emissive) return
+      const z = mesh.userData.zone
+      const target = z === focusedZone ? 0 : z === hovered ? 0.7 : pulse
+      mesh.material.emissiveIntensity = THREE.MathUtils.lerp(
+        mesh.material.emissiveIntensity,
+        target,
+        0.12
+      )
+    }
+    interactiveMeshes.current.forEach(applyGlow)
+    extraInteractive.meshes.forEach(applyGlow)
   })
 
   return <primitive object={scene} scale={scale} position={position} />

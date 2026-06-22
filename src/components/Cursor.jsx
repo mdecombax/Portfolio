@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { ZONE_TITLES } from './ProjectCard'
 
 export default function Cursor() {
   const ringRef = useRef(null)
@@ -128,7 +129,7 @@ export default function Cursor() {
             zIndex: 9998,
           }}
         >
-          projets
+          {ZONE_TITLES[zoneInfo.zone] ?? 'projets'}
         </div>
       )}
     </>

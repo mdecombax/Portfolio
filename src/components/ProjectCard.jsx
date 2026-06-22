@@ -45,6 +45,11 @@ const ZONE_PANELS = {
   },
 }
 
+// Titre de la pop-up par zone, réutilisé pour le label de survol (Cursor)
+export const ZONE_TITLES = Object.fromEntries(
+  Object.entries(ZONE_PANELS).map(([zone, panel]) => [zone, panel.title])
+)
+
 const ZONE_POSITIONS = {
   screen: [-0.95, -0.05, -0.65],
   phone:  [0.6, -0.3, -0.9],
