@@ -10,7 +10,7 @@ const DRAWER_OPEN = 1.15
 // Préfixe d'URL des assets (gère le base Vite, ex. '/Portfolio/' en prod)
 const BASE = import.meta.env.BASE_URL
 
-export default function Room({ focusedZone }) {
+export default function Room({ focusedZone, isMobile = false }) {
   const { scene } = useGLTF(`${BASE}room.glb`)
   const { camera, raycaster, pointer } = useThree()
   const tvTexture = useVideoTexture(`${BASE}tv.mp4`, { loop: true, muted: true, autoplay: true, crossOrigin: 'anonymous' })
@@ -22,6 +22,10 @@ export default function Room({ focusedZone }) {
   const drawerOpen = useRef(false)
   const drawerProgress = useRef(0)
   const focusedRef = useRef(null)
+  // Ref (pas dep d'effet) pour éviter de relancer la lourde init au changement
+  // de breakpoint, ce qui dupliquerait l'intérieur des tiroirs.
+  const isMobileRef = useRef(isMobile)
+  useEffect(() => { isMobileRef.current = isMobile }, [isMobile])
 
   const { scale, position } = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene)
@@ -193,6 +197,8 @@ export default function Room({ focusedZone }) {
     }
 
     const onMouseUp = (e) => {
+      // Sur mobile, la navigation passe par les hotspots / stepper, pas le raycast
+      if (isMobileRef.current) return
       const dx = e.clientX - downX
       const dy = e.clientY - downY
       if (dx * dx + dy * dy > 25) return
@@ -251,28 +257,32 @@ export default function Room({ focusedZone }) {
       window.dispatchEvent(new Event('draweropened'))
     }
 
-    raycaster.setFromCamera(pointer, camera)
-    const hits = raycaster.intersectObjects(
-      [...interactiveMeshes.current, ...extraInteractive.meshes],
-    )
-    const zone = hits.length > 0 ? hits[0].object.userData.zone : null
+    // Survol : raycast au pointeur — desktop uniquement (pas de hover tactile).
+    let zone = null
+    if (!isMobileRef.current) {
+      raycaster.setFromCamera(pointer, camera)
+      const hits = raycaster.intersectObjects(
+        [...interactiveMeshes.current, ...extraInteractive.meshes],
+      )
+      zone = hits.length > 0 ? hits[0].object.userData.zone : null
 
-    if (zone !== hoveredZoneRef.current) {
-      hoveredZoneRef.current = zone
+      if (zone !== hoveredZoneRef.current) {
+        hoveredZoneRef.current = zone
 
-      let detail = null
-      // Position du label = point d'impact réel du raycast (toujours sur la zone,
-      // sous le curseur). Les centroïdes Box3 (labelPos) sont peu fiables et
-      // plaçaient les tips de phone/drawer au niveau du bureau.
-      if (zone && hits.length > 0) {
-        const projected = hits[0].point.clone().project(camera)
-        detail = {
-          zone,
-          x: (projected.x * 0.5 + 0.5) * window.innerWidth,
-          y: (-projected.y * 0.5 + 0.5) * window.innerHeight,
+        let detail = null
+        // Position du label = point d'impact réel du raycast (toujours sur la zone,
+        // sous le curseur). Les centroïdes Box3 (labelPos) sont peu fiables et
+        // plaçaient les tips de phone/drawer au niveau du bureau.
+        if (zone && hits.length > 0) {
+          const projected = hits[0].point.clone().project(camera)
+          detail = {
+            zone,
+            x: (projected.x * 0.5 + 0.5) * window.innerWidth,
+            y: (-projected.y * 0.5 + 0.5) * window.innerHeight,
+          }
         }
+        window.dispatchEvent(new CustomEvent('hoveredzone', { detail }))
       }
-      window.dispatchEvent(new CustomEvent('hoveredzone', { detail }))
     }
 
     // Halo des zones cliquables (room.glb + robot) :

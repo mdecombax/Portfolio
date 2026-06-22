@@ -1,7 +1,7 @@
 import { Html } from '@react-three/drei'
 
 // Pour ajouter une zone : 1) ZONE_PANELS  2) ZONE_POSITIONS  3) ZONE_VIEWS dans CameraController
-const ZONE_PANELS = {
+export const ZONE_PANELS = {
   // Bureau / TV — apps web fonctionnelles (outils, IA, scraping)
   screen: {
     title: 'apps & outils',
@@ -49,6 +49,9 @@ const ZONE_PANELS = {
 export const ZONE_TITLES = Object.fromEntries(
   Object.entries(ZONE_PANELS).map(([zone, panel]) => [zone, panel.title])
 )
+
+// Ordre de parcours pour la navigation guidée mobile (stepper ‹ › et hotspots)
+export const ZONE_ORDER = ['screen', 'phone', 'robot', 'drawer']
 
 const ZONE_POSITIONS = {
   screen: [-0.95, -0.05, -0.65],

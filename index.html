@@ -2,15 +2,19 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Martin Decombarieu — Portfolio</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body {
+      html, body {
         background: #000000;
         overflow: hidden;
+        /* Bloque le scroll élastique / pull-to-refresh sur mobile */
+        overscroll-behavior: none;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
-      #root { width: 100vw; height: 100vh; }
+      #root { width: 100vw; height: 100vh; height: 100dvh; }
     </style>
   </head>
   <body>

@@ -10,8 +10,12 @@ import CameraController from './components/CameraController'
 import ProjectCard from './components/ProjectCard'
 import BgMusic from './components/BgMusic'
 import LoadingScreen from './components/LoadingScreen'
+import MobileSheet from './components/MobileSheet'
+import MobileNav from './components/MobileNav'
+import MobileHotspots from './components/MobileHotspots'
+import useIsMobile from './hooks/useIsMobile'
 
-function Lights() {
+function Lights({ isMobile = false }) {
   const screenRef = useRef()
   const t = useRef(0)
 
@@ -36,7 +40,7 @@ function Lights() {
         intensity={3.2}
         color="#ffd9a8"
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={isMobile ? [1024, 1024] : [2048, 2048]}
       />
 
       {/* Rebond chaud subtil sur le sol / murs */}
@@ -83,6 +87,7 @@ export default function App() {
   // focusedZone : pilote Room (ouverture tiroir) + ProjectCard
   // camFocus : pilote CameraController. Pour le tiroir il est différé jusqu'à
   // la fin de l'animation d'ouverture (événement 'draweropened').
+  const isMobile = useIsMobile()
   const [focusedZone, setFocusedZone] = useState(null)
   const [camFocus, setCamFocus] = useState(null)
   const [zoomReady, setZoomReady] = useState(false)
@@ -96,10 +101,13 @@ export default function App() {
           setCamFocus(null)
           return null
         }
-        if (!prev) {
+        // switch=true : passage direct d'une zone à l'autre (stepper mobile).
+        // Sans ce flag, un re-clic alors qu'une zone est ouverte est ignoré (desktop).
+        if (!prev || e.detail.switch) {
           focusedRef.current = e.detail
           // Le tiroir attend la fin de son animation avant de bouger la caméra
           if (e.detail.zone !== 'drawer') setCamFocus(e.detail)
+          else if (e.detail.switch) setCamFocus(null)
           return e.detail
         }
         return prev
@@ -130,20 +138,23 @@ export default function App() {
 
   return (
     <>
-      <Cursor />
+      {!isMobile && <Cursor />}
       <BgMusic src={`${import.meta.env.BASE_URL}music.mp3`} volume={0.4} />
       <Canvas
         camera={{ position: [5, 2, 5], fov: 45 }}
-        gl={{ antialias: true, toneMappingExposure: 1, alpha: true }}
+        gl={{ antialias: !isMobile, toneMappingExposure: 1, alpha: true }}
+        dpr={[1, isMobile ? 1.5 : 2]}
         style={{ background: 'transparent' }}
         shadows
       >
         <Suspense fallback={null}>
-          <Lights />
+          <Lights isMobile={isMobile} />
 
-          <Room focusedZone={focusedZone} />
+          <Room focusedZone={focusedZone} isMobile={isMobile} />
           <Robot />
-          <ProjectCard focusedZone={focusedZone} zoomReady={zoomReady} />
+          {isMobile
+            ? <MobileHotspots visible={!focusedZone} />
+            : <ProjectCard focusedZone={focusedZone} zoomReady={zoomReady} />}
 
           <ContactShadows
             position={[0, -2.1, 0]}
@@ -155,7 +166,7 @@ export default function App() {
 
           <EffectComposer multisampling={0}>
             <Bloom
-              intensity={0.8}
+              intensity={isMobile ? 0.5 : 0.8}
               luminanceThreshold={0.7}
               luminanceSmoothing={0.6}
               mipmapBlur
@@ -165,6 +176,7 @@ export default function App() {
 
         <OrbitControls
           makeDefault
+          enabled={!isMobile}
           enableZoom={false}
           minDistance={0.5}
           maxDistance={10}
@@ -173,8 +185,15 @@ export default function App() {
           enableDamping
           dampingFactor={0.04}
         />
-        <CameraController focusedZone={camFocus} onZoomReady={() => setZoomReady(true)} />
+        <CameraController focusedZone={camFocus} onZoomReady={() => setZoomReady(true)} isMobile={isMobile} />
       </Canvas>
+
+      {isMobile && (
+        <>
+          <MobileNav focusedZone={focusedZone} />
+          <MobileSheet focusedZone={focusedZone} zoomReady={zoomReady} />
+        </>
+      )}
 
       <LoadingScreen />
     </>

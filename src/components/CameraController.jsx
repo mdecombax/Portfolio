@@ -11,6 +11,10 @@ const HOME_CAM = new THREE.Vector3(5, 2, 5)
 const HOME_TARGET = new THREE.Vector3(0, 0, 0)
 const HOME_DIST = HOME_CAM.distanceTo(HOME_TARGET)
 
+// Vue d'ensemble mobile : caméra reculée car le FOV horizontal est plus étroit
+// en portrait (sinon la chambre déborde sur les côtés).
+const MOBILE_HOME_CAM = HOME_CAM.clone().multiplyScalar(1.28)
+
 function makeZoneView(camPos, target) {
   const dir = new THREE.Vector3().subVectors(target, camPos).normalize()
   // Évite le gimbal lock (regard vertical) en changeant le vecteur up
@@ -48,8 +52,37 @@ const ZONE_VIEWS = {
   ),
 }
 
-export default function CameraController({ focusedZone, onZoomReady }) {
+// Vues mobiles : la cible (centre projeté à l'écran) est posée SUR l'objet — pas
+// décalée comme en desktop (où elle laisse de la place au panneau latéral). La
+// caméra recule pour compenser le FOV horizontal étroit du portrait, l'objet se
+// retrouve centré dans le tiers haut, au-dessus du bottom-sheet.
+// À affiner à l'œil via window.debug.camlog (logue camPos + target courants).
+const MOBILE_ZONE_VIEWS = {
+  // Écran / bureau — vue de face-droite, reculée
+  screen: makeZoneView(
+    new THREE.Vector3(0.463, 0.113, -1.215),
+    new THREE.Vector3(-1.020, -0.100, -1.050),
+  ),
+  // Téléphone sur le lit — cible recalée sur le smartphone (bas-droite du lit)
+  phone: makeZoneView(
+    new THREE.Vector3(0.900, 1.150, -0.250),
+    new THREE.Vector3(0.900, 0.000, -0.550),
+  ),
+  // Robot sur l'étagère — vue de face, centré (sans le pan desktop)
+  robot: makeZoneView(
+    new THREE.Vector3(0.238, 0.282, -0.357),
+    new THREE.Vector3(-1.020, 0.100, -0.120),
+  ),
+  // Tiroir ouvert — cible basse pour remonter le tiroir au-dessus du sheet
+  drawer: makeZoneView(
+    new THREE.Vector3(0.600, 0.050, 1.500),
+    new THREE.Vector3(-0.620, -0.780, 1.500),
+  ),
+}
+
+export default function CameraController({ focusedZone, onZoomReady, isMobile = false }) {
   const { camera } = useThree()
+  const dbgTarget = useRef(new THREE.Vector3())
   const targetDist = useRef(null)
   const smoothedDist = useRef(null)
   const focused = useRef(false)
@@ -80,14 +113,30 @@ export default function CameraController({ focusedZone, onZoomReady }) {
     return () => window.removeEventListener('wheel', onWheel)
   }, [])
 
+  // Calibration mobile : logue la vue courante pour ajuster MOBILE_ZONE_VIEWS
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.debug = window.debug || {}
+    window.debug.camlog = () => {
+      const p = camera.position
+      const t = dbgTarget.current
+      console.log(
+        '[cam] camPos', [p.x, p.y, p.z].map((v) => +v.toFixed(3)),
+        'target', [t.x, t.y, t.z].map((v) => +v.toFixed(3)),
+      )
+    }
+  }, [camera])
+
   useFrame((_, delta) => {
     const controls = _.controls
     if (!controls) return
+    dbgTarget.current.copy(controls.target)
 
     const f = Math.min(LERP * delta * 60, 1)
+    const views = isMobile ? MOBILE_ZONE_VIEWS : ZONE_VIEWS
 
     if (focused.current) {
-      const view = ZONE_VIEWS[focusedZone?.zone]
+      const view = views[focusedZone?.zone]
       if (!view) return
       controls.enabled = false
 
@@ -104,6 +153,16 @@ export default function CameraController({ focusedZone, onZoomReady }) {
         zoomReadyFired.current = true
         onZoomReady?.()
       }
+      return
+    }
+
+    // Mobile : pas d'orbite libre. On maintient (ou ramène à) la vue d'ensemble.
+    if (isMobile) {
+      controls.enabled = false
+      returningHome.current = false
+      camera.position.lerp(MOBILE_HOME_CAM, f)
+      controls.target.lerp(HOME_TARGET, f)
+      camera.lookAt(controls.target)
       return
     }
 
