@@ -6,8 +6,7 @@ const ZONE_PANELS = {
   screen: {
     title: 'apps & outils',
     items: [
-      { id: 'finolio',      label: 'Finolio',              desc: 'Suivi de portefeuille DCA ETF',          url: 'https://finolio.fr/',
-        caseStudy: { label: 'étude technique — Import IA (Vertex AI)', url: 'https://github.com/mdecombax/suivi-finance/blob/main/docs/ai-import/README.md' } },
+      { id: 'finolio',      label: 'Finolio',              desc: 'Suivi de portefeuille DCA ETF',          url: 'https://finolio.fr/' },
       { id: 'flightscrape', label: 'FlightScrape',         desc: 'Meilleur prix pour un vol flexible',     url: 'https://flightscrape-437494083751.europe-west1.run.app/' },
       { id: 'autocast',     label: 'AutoCast Chess',       desc: "Commentaire audio d'une partie chess.com", url: 'https://autocastchess-855080868600.europe-west1.run.app/' },
       { id: 'avismaps',     label: 'Avis Maps',            desc: 'Avis Google Maps + analyse de prospects', url: 'https://avis-maps-app-74733590596.europe-west1.run.app/' },
@@ -21,6 +20,16 @@ const ZONE_PANELS = {
     items: [
       { id: 'terresite',     label: 'TerreSite',             desc: 'Globe terrestre 3D manipulable',        url: 'https://mdecombax.github.io/TerreSite/' },
       { id: 'constellation', label: 'Constellation Finance', desc: 'Données financières en constellation 3D', url: 'https://mdecombax.github.io/constellation_finance/' },
+    ],
+  },
+  // Robot sur l'étagère au-dessus de la tour PC — études techniques
+  robot: {
+    title: 'étude technique',
+    items: [
+      { id: 'finolio-ai', label: 'Import IA — Finolio', desc: 'Extraction de relevés via Vertex AI (Gemini)',
+        url: 'https://github.com/mdecombax/suivi-finance/blob/main/docs/ai-import/README.md' },
+      { id: 'wikiloc',    label: 'Wikiloc — Retrieval IA', desc: 'Embeddings cross-lingues sur Vertex AI (gemini-embedding-001)',
+        url: 'https://github.com/mdecombax/scrape_wikiloc/blob/main/docs/embeddings/README.md' },
     ],
   },
   // Table de chevet — sites vitrine / web design
@@ -39,6 +48,7 @@ const ZONE_POSITIONS = {
   screen: [-0.95, -0.05, -0.65],
   phone:  [0.6, -0.3, -0.9],
   drawer: [-1.05, -0.72, 2.05],
+  robot:  [-0.985, 0.15, 0.19],
 }
 
 export default function ProjectCard({ focusedZone, zoomReady }) {
