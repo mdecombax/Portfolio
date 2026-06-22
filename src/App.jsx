@@ -4,6 +4,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Suspense, useRef, useState, useEffect } from 'react'
 
 import Room from './components/Room'
+import Robot from './components/Robot'
 import Cursor from './components/Cursor'
 import CameraController from './components/CameraController'
 import ProjectCard from './components/ProjectCard'
@@ -141,6 +142,7 @@ export default function App() {
           <Lights />
 
           <Room focusedZone={focusedZone} />
+          <Robot />
           <ProjectCard focusedZone={focusedZone} zoomReady={zoomReady} />
 
           <ContactShadows

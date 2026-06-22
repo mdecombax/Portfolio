@@ -2,6 +2,7 @@ import { useGLTF, useVideoTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useMemo, useRef, useEffect } from 'react'
 import * as THREE from 'three'
+import { extraInteractive } from './interactiveRegistry'
 
 // Distance d'ouverture du tiroir, en unités locales de group1 (profondeur ≈ 1.69)
 const DRAWER_OPEN = 1.15
@@ -203,11 +204,14 @@ export default function Room({ focusedZone }) {
       const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1
       const ny = -((e.clientY - rect.top) / rect.height) * 2 + 1
       raycaster.setFromCamera({ x: nx, y: ny }, camera)
-      const hits = raycaster.intersectObjects(interactiveMeshes.current, false)
+      const hits = raycaster.intersectObjects(
+        [...interactiveMeshes.current, ...extraInteractive.meshes],
+        false,
+      )
 
       if (hits.length > 0) {
         const zone = hits[0].object.userData.zone
-        const lp = labelPos.current[zone]
+        const lp = labelPos.current[zone] ?? extraInteractive.labelPos[zone]
         window.dispatchEvent(new CustomEvent('zoneclick', {
           detail: { zone, position: lp ? lp.clone() : null },
         }))
@@ -248,14 +252,16 @@ export default function Room({ focusedZone }) {
     }
 
     raycaster.setFromCamera(pointer, camera)
-    const hits = raycaster.intersectObjects(interactiveMeshes.current)
+    const hits = raycaster.intersectObjects(
+      [...interactiveMeshes.current, ...extraInteractive.meshes],
+    )
     const zone = hits.length > 0 ? hits[0].object.userData.zone : null
 
     if (zone !== hoveredZoneRef.current) {
       hoveredZoneRef.current = zone
 
       let detail = null
-      const lp = zone ? labelPos.current[zone] : null
+      const lp = zone ? (labelPos.current[zone] ?? extraInteractive.labelPos[zone]) : null
       if (zone && lp) {
         const projected = lp.clone().project(camera)
         detail = {

@@ -11,7 +11,6 @@ const ZONE_PANELS = {
       { id: 'autocast',     label: 'AutoCast Chess',       desc: "Commentaire audio d'une partie chess.com", url: 'https://autocastchess-855080868600.europe-west1.run.app/' },
       { id: 'avismaps',     label: 'Avis Maps',            desc: 'Avis Google Maps + analyse de prospects', url: 'https://avis-maps-app-74733590596.europe-west1.run.app/' },
       { id: 'newsletter',   label: 'Newsletter Reddit',    desc: 'Newsletter générée depuis tes subreddits', url: 'https://first-finale-fgjotolufq-ew.a.run.app/static/' },
-      { id: 'wikiloc',      label: 'Wikiloc Search',       desc: 'Recherche sémantique de randonnées',     url: 'https://wikiloc-search-uzi6vittua-ew.a.run.app' },
     ],
   },
   // Téléphone (lit) — expériences 3D / data-art
@@ -24,12 +23,14 @@ const ZONE_PANELS = {
   },
   // Robot sur l'étagère au-dessus de la tour PC — études techniques
   robot: {
-    title: 'étude technique',
+    title: 'IA',
     items: [
-      { id: 'finolio-ai', label: 'Import IA — Finolio', desc: 'Extraction de relevés via Vertex AI (Gemini)',
+      { id: 'finolio-ai',     label: 'Import IA — Finolio',    desc: 'Extraction de relevés via Vertex AI (Gemini)',
         url: 'https://github.com/mdecombax/suivi-finance/blob/main/docs/ai-import/README.md' },
-      { id: 'wikiloc',    label: 'Wikiloc — Retrieval IA', desc: 'Embeddings cross-lingues sur Vertex AI (gemini-embedding-001)',
-        url: 'https://github.com/mdecombax/scrape_wikiloc/blob/main/docs/embeddings/README.md' },
+      { id: 'wikiloc',        label: 'Wikiloc Search',         desc: 'Recherche sémantique de randonnées',
+        url: 'https://wikiloc-search-uzi6vittua-ew.a.run.app',
+        caseStudy: { label: 'Étude — Retrieval IA (Vertex AI)',
+          url: 'https://github.com/mdecombax/scrape_wikiloc/blob/main/docs/embeddings/README.md' } },
     ],
   },
   // Table de chevet — sites vitrine / web design

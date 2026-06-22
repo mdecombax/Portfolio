@@ -38,6 +38,14 @@ const ZONE_VIEWS = {
     new THREE.Vector3(0.250, -0.380, 1.500),
     new THREE.Vector3(-1.050, -1.000, 1.500),
   ),
+  // Robot sur l'étagère en verre du dessus (centre ≈ [-1.05, 0.05, -0.15]),
+  // orienté face au lit. La caméra est « pannée » vers la gauche (camPos+target
+  // décalés de camera_left * 0.25 ≈ [0.046, 0, 0.246]) pour que le robot se cale
+  // à droite du cadre et laisser la place à la pop-up à gauche.
+  robot: makeZoneView(
+    new THREE.Vector3(-0.314, 0.100, -0.034),
+    new THREE.Vector3(-1.004, 0.000, 0.096),
+  ),
 }
 
 export default function CameraController({ focusedZone, onZoomReady }) {
